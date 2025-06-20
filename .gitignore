@@ -4,9 +4,15 @@
 /node_modules
 /.pnp
 .pnp.js
-
+/.idea
 # testing
 /coverage
+
+# back-end ignores
+back-end/target/
+back-end/.idea/
+/target
+/.idea
 
 # production
 /build
