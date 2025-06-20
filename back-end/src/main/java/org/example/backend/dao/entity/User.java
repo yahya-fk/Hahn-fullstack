@@ -22,6 +22,9 @@ public class User {
     @Id
     private String username;
     private String password;
+    private String email;
+    private String firstName;
+    private String lastName;
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles ;
 
