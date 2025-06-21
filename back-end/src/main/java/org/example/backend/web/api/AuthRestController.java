@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.Valid;
 import org.example.backend.dao.entity.User;
 import org.example.backend.dto.CreateUserDto;
 import org.example.backend.dto.LoginDto;
@@ -48,7 +49,7 @@ public class AuthRestController {
     private UserMapper userMapper;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody LoginDto loginDto) {
+    public Map<String, String> login(@Valid @RequestBody LoginDto loginDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
@@ -69,7 +70,7 @@ public class AuthRestController {
     }
 
     @PostMapping("/register")
-    public UserDto register(@RequestBody CreateUserDto createUserDto) {
+    public UserDto register(@Valid @RequestBody CreateUserDto createUserDto) {
         User user = userMapper.toEntity(createUserDto);
         User savedUser = accountService.saveUser(user);
         return userMapper.toDto(savedUser);

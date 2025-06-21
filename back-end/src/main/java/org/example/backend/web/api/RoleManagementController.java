@@ -1,5 +1,6 @@
 package org.example.backend.web.api;
 
+import jakarta.validation.Valid;
 import org.example.backend.dto.RoleDto;
 import org.example.backend.service.RoleManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class RoleManagementController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RoleDto> createRole(@RequestBody RoleDto roleDto) {
+    public ResponseEntity<RoleDto> createRole(@Valid @RequestBody RoleDto roleDto) {
         try {
             RoleDto createdRole = roleManagementService.createRole(roleDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRole);

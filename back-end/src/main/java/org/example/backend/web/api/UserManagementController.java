@@ -1,5 +1,6 @@
 package org.example.backend.web.api;
 
+import jakarta.validation.Valid;
 import org.example.backend.dto.CreateUserDto;
 import org.example.backend.dto.UpdateUserDto;
 import org.example.backend.dto.UserDto;
@@ -23,7 +24,7 @@ public class UserManagementController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserDto createUserDto) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserDto createUserDto) {
         try {
             UserDto createdUser = userManagementService.createUser(createUserDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
@@ -52,7 +53,7 @@ public class UserManagementController {
 
     @PutMapping("/{username}")
     @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
-    public ResponseEntity<UserDto> updateUser(@PathVariable String username, @RequestBody UpdateUserDto updateUserDto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable String username, @Valid @RequestBody UpdateUserDto updateUserDto) {
         try {
             UserDto updatedUser = userManagementService.updateUser(username, updateUserDto);
             return ResponseEntity.ok(updatedUser);
@@ -74,7 +75,7 @@ public class UserManagementController {
 
     @PostMapping("/roles")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDto> addRoleToUser(@RequestBody UserRoleDto userRoleDto) {
+    public ResponseEntity<UserDto> addRoleToUser(@Valid @RequestBody UserRoleDto userRoleDto) {
         try {
             UserDto updatedUser = userManagementService.addRoleToUser(userRoleDto);
             return ResponseEntity.ok(updatedUser);
@@ -85,7 +86,7 @@ public class UserManagementController {
 
     @DeleteMapping("/roles")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDto> removeRoleFromUser(@RequestBody UserRoleDto userRoleDto) {
+    public ResponseEntity<UserDto> removeRoleFromUser(@Valid @RequestBody UserRoleDto userRoleDto) {
         try {
             UserDto updatedUser = userManagementService.removeRoleFromUser(userRoleDto);
             return ResponseEntity.ok(updatedUser);

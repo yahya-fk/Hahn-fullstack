@@ -1,5 +1,6 @@
 package org.example.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserRoleDto {
+    @NotBlank(message = "Username is required")
     private String username;
+    
+    @NotBlank(message = "Role is required")
     private String role;
 }

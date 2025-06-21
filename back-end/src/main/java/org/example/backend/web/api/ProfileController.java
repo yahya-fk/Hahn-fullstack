@@ -1,5 +1,6 @@
 package org.example.backend.web.api;
 
+import jakarta.validation.Valid;
 import org.example.backend.dto.ChangePasswordDto;
 import org.example.backend.dto.ProfileUpdateDto;
 import org.example.backend.dto.UserDto;
@@ -38,7 +39,7 @@ public class ProfileController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORDINARY')")
-    public ResponseEntity<UserDto> updateProfile(@RequestBody ProfileUpdateDto profileUpdateDto) {
+    public ResponseEntity<UserDto> updateProfile(@Valid @RequestBody ProfileUpdateDto profileUpdateDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -51,7 +52,7 @@ public class ProfileController {
 
     @PutMapping("/password")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORDINARY')")
-    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+    public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ChangePasswordDto changePasswordDto) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
