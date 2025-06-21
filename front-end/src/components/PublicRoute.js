@@ -7,7 +7,6 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   
-  // Show loading spinner while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-light-bg dark:bg-dark-bg">
@@ -16,13 +15,11 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  // If authenticated, redirect to dashboard (or the page they were trying to access)
   if (isAuthenticated) {
-    const from = location.state?.from?.pathname || '/dashboard';
+    const from = location.state?.from?.pathname || '/';
     return <Navigate to={from} replace />;
   }
 
-  // Render public content (login/register forms)
   return children;
 };
 

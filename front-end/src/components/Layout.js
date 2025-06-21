@@ -1,38 +1,114 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import Icon from '@mdi/react';
+import { 
+  mdiAccount, 
+  mdiLogout, 
+  mdiChevronDown, 
+  mdiHome,
+  mdiAccountMultiple,
+  mdiShield,
+  mdiWeatherNight,
+  mdiWeatherSunny
+} from '@mdi/js';
 
-// Icon components
+// Icon components (keeping for backwards compatibility)
 const UserIcon = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
+  <Icon path={mdiAccount} size={0.8} className={className} />
+);
+
+const HomeIcon = ({ className }) => (
+  <Icon path={mdiHome} size={0.8} className={className} />
+);
+
+const UsersIcon = ({ className }) => (
+  <Icon path={mdiAccountMultiple} size={0.8} className={className} />
+);
+
+const RolesIcon = ({ className }) => (
+  <Icon path={mdiShield} size={0.8} className={className} />
 );
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+  
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const navigation = [
+    { name: 'Home', href: '/', icon: HomeIcon },
+    { name: 'Users', href: '/users', icon: UsersIcon },
+    { name: 'Roles', href: '/roles', icon: RolesIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Force logout anyway
+      navigate('/login');
+    }
+  };
+
+  const getUserInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user?.username) {
+      return user.username.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return user?.username || 'User';
+  };
+
+  const getUserRole = () => {
+    if (user?.roles && user.roles.length > 0) {
+      return user.roles[0].name === 'ADMIN' ? 'Administrator' : 'User';
+    }
+    return 'User';
+  };
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors">
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-light-card dark:bg-dark-card border-r border-light-border dark:border-dark-border">
         {/* Logo */}
-        <div className="flex h-16 items-center px-6 border-b border-light-border dark:border-dark-border">
-          <div className="flex items-center">
+        <div className="flex h-20 items-center justify-center  border-b border-light-border dark:border-dark-border">
+          <div className="flex items-center justify-center w-full">
             <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <h1 className="text-lg font-semibold text-light-text dark:text-dark-text">
-                Hahn Software
-              </h1>
+              <img 
+                src="/hahn_freigestellt.png" 
+                alt="Hahn Software" 
+                className="h-20 w-auto max-w-full object-contain"
+              />
             </div>
           </div>
         </div>
@@ -67,20 +143,16 @@ const Layout = ({ children }) => {
           <div className="flex items-center justify-between p-3 bg-light-surface dark:bg-dark-surface rounded-lg">
             <span className="text-sm text-light-muted dark:text-dark-muted">
               Theme: {theme === 'dark' ? 'Dark' : 'Light'}
-            </span>            <button
+            </span>
+            <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border text-light-text dark:text-dark-text hover:bg-light-card dark:hover:bg-dark-card transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
+              <Icon 
+                path={theme === 'dark' ? mdiWeatherSunny : mdiWeatherNight} 
+                size={0.8} 
+              />
             </button>
           </div>
         </div>
@@ -100,17 +172,96 @@ const Layout = ({ children }) => {
                   {getPageDescription(location.pathname)}
                 </p>
               </div>
-                {/* User Menu */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3">
-                  <div className="h-8 w-8 bg-primary-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">JD</span>
+              
+              {/* Enhanced User Menu */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-semibold">{getUserInitials()}</span>
+                    </div>
+                    <div className="text-left hidden sm:block">
+                      <div className="font-medium text-light-text dark:text-dark-text text-sm">
+                        {getUserDisplayName()}
+                      </div>
+                      <div className="text-light-muted dark:text-dark-muted text-xs">
+                        {getUserRole()}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    <div className="font-medium text-light-text dark:text-dark-text">John Doe</div>
-                    <div className="text-light-muted dark:text-dark-muted">Administrator</div>
+                  <Icon 
+                    path={mdiChevronDown} 
+                    size={0.8} 
+                    className={`text-light-muted dark:text-dark-muted transition-transform ${
+                      isUserMenuOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-light-card dark:bg-dark-card rounded-lg shadow-lg border border-light-border dark:border-dark-border z-50">
+                    <div className="py-2">
+                      {/* User Info */}
+                      <div className="px-4 py-3 border-b border-light-border dark:border-dark-border">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-semibold">{getUserInitials()}</span>
+                          </div>
+                          <div>
+                            <div className="font-medium text-light-text dark:text-dark-text text-sm">
+                              {getUserDisplayName()}
+                            </div>
+                            <div className="text-light-muted dark:text-dark-muted text-xs">
+                              {user?.email || user?.username}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-light-text dark:text-dark-text hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
+                        >
+                          <Icon path={mdiAccount} size={0.8} className="mr-3 text-light-muted dark:text-dark-muted" />
+                          My Profile
+                        </Link>
+                        
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            toggleTheme();
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-light-text dark:text-dark-text hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
+                        >
+                          <Icon 
+                            path={theme === 'dark' ? mdiWeatherSunny : mdiWeatherNight} 
+                            size={0.8} 
+                            className="mr-3 text-light-muted dark:text-dark-muted" 
+                          />
+                          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                        </button>
+                      </div>
+
+                      {/* Logout */}
+                      <div className="border-t border-light-border dark:border-dark-border pt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <Icon path={mdiLogout} size={0.8} className="mr-3" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -130,18 +281,22 @@ const getPageTitle = (pathname) => {
   const titles = {
     '/': 'Menu',
     '/users': 'User Management',
-    '/roles': 'Role Management',
+    '/roles': 'Role Management', 
     '/profile': 'Profile',
+    '/login': 'Login',
+    '/register': 'Register',
   };
   return titles[pathname] || 'Page';
 };
 
 const getPageDescription = (pathname) => {
   const descriptions = {
-    '/': 'Welcome to Hahn Software - Select a module to get started',
-    '/users': 'Manage system users and permissions',
-    '/roles': 'Configure roles and access controls',
-    '/profile': 'Manage your account settings',
+    '/': 'Welcome to Hahn Software - Your central management hub',
+    '/users': 'Manage system users, permissions, and access controls',
+    '/roles': 'Configure roles and define user access levels',
+    '/profile': 'Manage your account settings and personal information',
+    '/login': 'Sign in to your account',
+    '/register': 'Create a new account',
   };
   return descriptions[pathname] || 'Manage your content';
 };

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -18,7 +18,12 @@ api.interceptors.request.use(
     // Add auth token if available
     const token = localStorage.getItem('authToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Check if token already has Bearer prefix
+      if (token.startsWith('Bearer ')) {
+        config.headers.Authorization = token;
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -65,6 +70,13 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   refreshToken: () => api.post('/auth/refresh'),
+};
+
+// Profile API endpoints
+export const profileAPI = {
+  getProfile: () => api.get('/profile'),
+  updateProfile: (data) => api.put('/profile', data),
+  changePassword: (passwordData) => api.put('/profile/password', passwordData),
 };
 
 export default api;
