@@ -1,18 +1,18 @@
 package org.example.backend.service.Impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.example.backend.dao.entity.Role;
 import org.example.backend.dao.entity.User;
 import org.example.backend.dao.repository.RoleRepository;
 import org.example.backend.dao.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import org.example.backend.service.AccountService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 @Service
 @Transactional
 @AllArgsConstructor
