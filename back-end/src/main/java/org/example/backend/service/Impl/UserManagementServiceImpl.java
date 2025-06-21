@@ -8,6 +8,8 @@ import org.example.backend.dto.CreateUserDto;
 import org.example.backend.dto.UpdateUserDto;
 import org.example.backend.dto.UserDto;
 import org.example.backend.dto.UserRoleDto;
+import org.example.backend.dto.ChangePasswordDto;
+import org.example.backend.dto.ProfileUpdateDto;
 import org.example.backend.mapper.UserMapper;
 import org.example.backend.service.UserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,5 +124,40 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         return userMapper.toDto(user);
+    }
+
+    @Override
+    public UserDto updateProfile(String username, ProfileUpdateDto profileUpdateDto) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+
+        // Update profile fields
+        if (profileUpdateDto.getEmail() != null) {
+            user.setEmail(profileUpdateDto.getEmail());
+        }
+        if (profileUpdateDto.getFirstName() != null) {
+            user.setFirstName(profileUpdateDto.getFirstName());
+        }
+        if (profileUpdateDto.getLastName() != null) {
+            user.setLastName(profileUpdateDto.getLastName());
+        }
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
+    @Override
+    public void changePassword(String username, ChangePasswordDto changePasswordDto) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+
+        // Verify current password
+        if (!bCryptPasswordEncoder.matches(changePasswordDto.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        // Update password
+        user.setPassword(bCryptPasswordEncoder.encode(changePasswordDto.getNewPassword()));
+        userRepository.save(user);
     }
 }
