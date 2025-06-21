@@ -51,10 +51,12 @@ api.interceptors.response.use(
 // API endpoints
 export const userAPI = {
   getAll: () => api.get('/users'),
-  getById: (id) => api.get(`/users/${id}`),
+  getByUsername: (username) => api.get(`/users/${username}`),
   create: (data) => api.post('/users', data),
-  update: (id, data) => api.put(`/users/${id}`, data),
-  delete: (id) => api.delete(`/users/${id}`),
+  update: (username, data) => api.put(`/users/${username}`, data),
+  delete: (username) => api.delete(`/users/${username}`),
+  addRole: (userRoleData) => api.post('/users/roles', userRoleData),
+  removeRole: (userRoleData) => api.delete('/users/roles', { data: userRoleData }),
 };
 
 export const productAPI = {

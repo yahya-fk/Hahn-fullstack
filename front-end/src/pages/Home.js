@@ -35,25 +35,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <img 
-            src="/logo.gif" 
-            alt="Hahn Software Logo" 
-            className="mx-auto h-24 drop-shadow-xl mb-6"
-          />
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to Hahn Software
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            Manage your system with powerful tools
-          </p>
-        </motion.div>
+        
 
         {/* Menu Cards */}
         <motion.div
