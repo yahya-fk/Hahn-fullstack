@@ -54,10 +54,9 @@ const Login = () => {
     
     try {
       const result = await login(formData);
-      
-      if (result.success) {
-        // Navigate to the page they were trying to access, or dashboard
-        const from = location.state?.from?.pathname || '/dashboard';
+        if (result.success) {
+        // Navigate to the page they were trying to access, or home menu
+        const from = location.state?.from?.pathname || '/';
         navigate(from, { replace: true });
       } else {
         setError('Login failed. Please check your credentials.');
