@@ -375,3 +375,29 @@ server.servlet.context-path=/
    docker build -t hahn-frontend-prod .
    docker run -p 80:80 hahn-frontend-prod
    ```
+
+## 📸 Application Screenshots
+
+### **Login & Authentication**
+![Login Screen](front-end/public/screenshots/login%20ScreeenShot.png)
+*Clean and modern login interface with form validation*
+
+### **User Registration**
+![Sign Up Screen](front-end/public/screenshots/Sign%20Up%20screenshot.png)
+*User-friendly registration form with real-time validation*
+
+### **Navigation & Dashboard**
+![Menu Navigation](front-end/public/screenshots/Menu.png)
+*Responsive navigation menu with role-based access control*
+
+### **User Management (Admin)**
+![User CRUD](front-end/public/screenshots/User%20Crud.png)
+*Complete user management interface with CRUD operations*
+
+### **Role Management (Admin)**
+![Role CRUD](front-end/public/screenshots/Role%20Crud.png)
+*Role management system with permissions control*
+
+### **Profile Management**
+![Profile Screen](front-end/public/screenshots/Profile%20screen.png)
+*User profile management with password change functionality*
