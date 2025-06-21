@@ -30,17 +30,37 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-    jwt = jwt.substring(SecurityParameters.PREFIX.length());
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SecurityParameters.SECRET)).build();
-        DecodedJWT decodedJWT = verifier.verify(jwt);
-        String username = decodedJWT.getSubject();
-        List<String> roles = decodedJWT.getClaims().get("roles").asList(String.class);
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        for(String role : roles){
-            authorities.add(new SimpleGrantedAuthority(role));
+        try {
+            jwt = jwt.substring(SecurityParameters.PREFIX.length()).trim();
+            
+            if(jwt.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\":\"Empty JWT token\"}");
+                return;
+            }
+            
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SecurityParameters.SECRET)).build();
+            DecodedJWT decodedJWT = verifier.verify(jwt);
+            String username = decodedJWT.getSubject();
+            List<String> roles = decodedJWT.getClaims().get("roles").asList(String.class);
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            for(String role : roles){
+                String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                authorities.add(new SimpleGrantedAuthority(roleWithPrefix));
+            }
+            UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(username, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(user);
+        } catch (Exception e) {
+            System.err.println("JWT Authentication failed: " + e.getMessage());
+            System.err.println("Original Authorization header: " + request.getHeader("Authorization"));
+            System.err.println("Extracted JWT token: " + jwt);
+            
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Invalid JWT token: " + e.getMessage() + "\"}");
+            return;
         }
-        UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(username, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(user);
+        
         filterChain.doFilter(request, response);
     }
 }

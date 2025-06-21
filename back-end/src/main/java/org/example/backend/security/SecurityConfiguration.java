@@ -46,6 +46,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                                 .requestMatchers("/api/users/**").authenticated()
                                 .requestMatchers("/api/roles/**").authenticated()
+                                .requestMatchers("/api/profile/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -67,7 +68,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.applyPermitDefaultValues();
-        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedOrigin("http://localhost:3000");
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
