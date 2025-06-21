@@ -1,11 +1,14 @@
 package org.example.backend.web.api;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.example.backend.dao.entity.User;
+import org.example.backend.dto.CreateUserDto;
+import org.example.backend.dto.LoginDto;
+import org.example.backend.dto.UserDto;
+import org.example.backend.mapper.UserMapper;
 import org.example.backend.security.SecurityParameters;
 import org.example.backend.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +19,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,11 +44,14 @@ public class AuthRestController {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody User user) {
+    public Map<String, String> login(@RequestBody LoginDto loginDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String jwt = JWT.create()
                     .withSubject(userDetails.getUsername())
@@ -55,8 +69,10 @@ public class AuthRestController {
     }
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return accountService.saveUser(user);
+    public UserDto register(@RequestBody CreateUserDto createUserDto) {
+        User user = userMapper.toEntity(createUserDto);
+        User savedUser = accountService.saveUser(user);
+        return userMapper.toDto(savedUser);
     }
 
     @PostMapping("/verify")
@@ -117,8 +133,9 @@ public class AuthRestController {
             User user = accountService.findUserByUsername(username);
             
             if (user != null) {
-                response.put("username", user.getUsername());
-                response.put("roles", user.getRoles());
+                UserDto userDto = userMapper.toDto(user);
+                response.put("username", userDto.getUsername());
+                response.put("roles", userDto.getRoles());
                 return ResponseEntity.ok(response);
             } else {
                 response.put("error", "User not found");

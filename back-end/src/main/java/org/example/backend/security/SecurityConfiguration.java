@@ -1,10 +1,14 @@
 package org.example.backend.security;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,11 +20,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -31,7 +33,6 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(getCorsConfigurationSource()))
@@ -43,14 +44,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/auth/verify").permitAll()
                                 .requestMatchers("/api/auth/logout").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/users/all").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/products/all").hasAnyAuthority("ADMIN", "ORDINARY")
-                                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyAuthority("ADMIN", "ORDINARY")
-                                .requestMatchers(HttpMethod.GET, "/api/categories/all").hasAnyAuthority("ADMIN", "ORDINARY")
-                                .requestMatchers(HttpMethod.GET, "/api/categories/**").hasAnyAuthority("ADMIN", "ORDINARY")
-                                .requestMatchers(HttpMethod.POST, "/api/products/save").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/products/delete/**").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/products/update").hasAuthority("ADMIN")
+                                .requestMatchers("/api/users/**").authenticated()
+                                .requestMatchers("/api/roles/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
