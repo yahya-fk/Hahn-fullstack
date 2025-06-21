@@ -81,4 +81,12 @@ export const profileAPI = {
   changePassword: (passwordData) => api.put('/profile/password', passwordData),
 };
 
+// Role API endpoints
+export const roleAPI = {
+  getAll: () => api.get('/roles'),
+  getByName: (roleName) => api.get(`/roles/${roleName}`),
+  create: (data) => api.post('/roles', data),
+  delete: (roleName) => api.delete(`/roles/${roleName}`),
+};
+
 export default api;

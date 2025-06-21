@@ -1,35 +1,67 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@mdi/react';
-import { mdiShieldAccount, mdiPlus, mdiPencil, mdiDelete, mdiAccountGroup } from '@mdi/js';
+import { mdiShieldAccount, mdiPlus, mdiDelete, mdiAccountGroup } from '@mdi/js';
+import { useRoleManagement } from '../hooks/useRoleManagement';
+import RoleCrudModal from '../components/RoleCrudModal';
+import Toast from '../components/Toast';
 
-const RoleManagement = () => {
-  const [roles] = useState([
-    {
-      id: 1,
-      name: 'Administrator',
-      description: 'Full system access with all permissions',
-      userCount: 3,
-      permissions: ['Create', 'Read', 'Update', 'Delete', 'Manage Users', 'Manage Roles'],
-      color: 'bg-red-500'
-    },
-    {
-      id: 2,
-      name: 'Manager',
-      description: 'Management level access to user operations',
-      userCount: 8,
-      permissions: ['Create', 'Read', 'Update', 'Manage Users'],
-      color: 'bg-blue-500'
-    },
-    {
-      id: 3,
-      name: 'User',
-      description: 'Standard user with basic permissions',
-      userCount: 24,
-      permissions: ['Read'],
-      color: 'bg-green-500'
+const RoleManagement = () => {  const { roles, loading, error, createRole, deleteRole } = useRoleManagement();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastConfig, setToastConfig] = useState({ message: '', type: 'success', isVisible: false });
+
+  const showToast = (message, type = 'success') => {
+    setToastConfig({ message, type, isVisible: true });
+  };
+  const handleCreateRole = async (roleName) => {
+    try {
+      await createRole(roleName);
+      showToast('Role created successfully!', 'success');
+      setIsModalOpen(false);
+    } catch (error) {
+      showToast('Failed to create role: ' + error.message, 'error');
     }
-  ]);
+  };
+
+  const handleDeleteRole = async (roleName) => {
+    if (window.confirm(`Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`)) {
+      try {
+        await deleteRole(roleName);
+        showToast('Role deleted successfully!', 'success');
+      } catch (error) {
+        showToast('Failed to delete role: ' + error.message, 'error');
+      }
+    }
+  };  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  if (loading && roles.length === 0) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-light-muted dark:text-dark-muted">Loading roles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && roles.length === 0) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 dark:text-red-400 mb-4">Error loading roles: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -48,14 +80,19 @@ const RoleManagement = () => {
             <h1 className="text-3xl font-bold text-light-text dark:text-dark-text">Role Management</h1>
             <p className="text-light-muted dark:text-dark-muted">Configure roles and permissions</p>
           </div>
-        </div>
-        <motion.button
+        </div>        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl flex items-center space-x-2 shadow-lg transition-colors"
+          onClick={() => setIsModalOpen(true)}
+          disabled={loading}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl flex items-center space-x-2 shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Icon path={mdiPlus} size={1} />
-          <span>Add Role</span>
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Icon path={mdiPlus} size={1} />
+          )}
+          <span>{loading ? 'Loading...' : 'Add Role'}</span>
         </motion.button>
       </motion.div>
 
@@ -126,12 +163,13 @@ const RoleManagement = () => {
               <div className="flex items-center space-x-3">
                 <div className={`w-4 h-4 rounded-full ${role.color}`}></div>
                 <h3 className="text-xl font-bold text-light-text dark:text-dark-text">{role.name}</h3>
-              </div>
-              <div className="flex space-x-2">
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  <Icon path={mdiPencil} size={0.8} className="text-gray-600 dark:text-gray-400" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              </div>              <div className="flex space-x-2">
+                <button 
+                  onClick={() => handleDeleteRole(role.role)}
+                  disabled={loading}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Delete role"
+                >
                   <Icon path={mdiDelete} size={0.8} className="text-red-600 dark:text-red-400" />
                 </button>
               </div>
@@ -163,10 +201,24 @@ const RoleManagement = () => {
                   </span>
                 ))}
               </div>
-            </div>
-          </motion.div>
+            </div>          </motion.div>
         ))}
-      </motion.div>
+      </motion.div>      {/* Role CRUD Modal */}
+      <RoleCrudModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        role={null}
+        onSubmit={handleCreateRole}
+        title="Add New Role"
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastConfig.message}
+        type={toastConfig.type}
+        isVisible={toastConfig.isVisible}
+        onClose={() => setToastConfig(prev => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 };
