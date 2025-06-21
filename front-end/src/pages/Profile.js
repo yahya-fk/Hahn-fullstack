@@ -42,9 +42,9 @@ const Profile = () => {
         username: profile.username || '',
         email: profile.email || '',
         // These fields might not be in the API response, so we'll use fallback values
-        phone: profile.phone || '+1 (555) 123-4567',
-        department: profile.department || 'Software Development',
-        position: profile.position || 'Developer'
+        phone: profile.phone || '+212707957177',
+        department: profile.department || 'Software Engineer',
+        position: profile.position || 'Full Stack Engineer Java/React'
       });
     }
   }, [profile]);

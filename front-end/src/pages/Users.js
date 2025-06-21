@@ -3,9 +3,11 @@ import { Card, Button, Input, Select, Badge, Modal } from '../components/UI';
 import Toast from '../components/Toast';
 import RoleManagementModal from '../components/RoleManagementModal';
 import userManagementService from '../services/userManagementService';
+import roleService from '../services/roleService';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [availableRoles, setAvailableRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -38,7 +40,25 @@ const Users = () => {
       }
     };
 
-    loadUsersOnMount();
+    const loadRoles = async () => {
+      try {
+        const rolesData = await roleService.getAllRoles();
+        setAvailableRoles(rolesData);
+      } catch (error) {
+        console.error('Failed to load roles:', error);
+        // Fallback to default roles if API fails
+        setAvailableRoles([
+          { role: 'USER' },
+          { role: 'ADMIN' }
+        ]);
+      }
+    };
+
+    const loadInitialData = async () => {
+      await Promise.all([loadUsersOnMount(), loadRoles()]);
+    };
+
+    loadInitialData();
   }, []);
 
   const loadUsers = async () => {
@@ -220,9 +240,11 @@ const Users = () => {
             className="sm:max-w-xs"
           >
             <option value="all">All Roles</option>
-            <option value="user">User</option>
-            <option value="moderator">Moderator</option>
-            <option value="admin">Admin</option>
+            {availableRoles.map((role) => (
+              <option key={role.role} value={role.role.toLowerCase()}>
+                {role.role}
+              </option>
+            ))}
           </Select>
         </div>
         <Button onClick={() => setShowModal(true)} disabled={loading}>
