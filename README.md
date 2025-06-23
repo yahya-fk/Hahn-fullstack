@@ -38,7 +38,7 @@
 
 - ✅ **Authentication System** - Complete JWT authentication implementation
 - ✅ **Docker Containerization** - Full Docker support with docker-compose
-- ✅ **Unit Testing** - JUnit tests for backend, Jest setup for frontend
+- ✅ **Unit Testing** - JUnit tests for backend
 - ✅ **Role-Based Authorization** - Admin/User role management system
 - ✅ **Modern UI/UX** - Dark/Light themes, animations, responsive design
 - ✅ **Security Features** - BCrypt password hashing, CORS configuration
